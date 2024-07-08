@@ -40,10 +40,10 @@ exports.getUserById = async (req, res) => {
 };
 
 exports.addUser = async (req, res) => {
-    const { name, email, role } = req.body;
+    const { name, email, role, team } = req.body;
 
-    if (!name || !email || !role) {
-        return res.status(400).send('Nome, e-mail e cargo são requeridos.');
+    if (!name || !email || !role || !team) {
+        return res.status(400).send('Nome, e-mail, cargo e equipe são requeridos.');
     }
 
     try {
@@ -51,20 +51,22 @@ exports.addUser = async (req, res) => {
         const newUserRef = await usersRef.add({
             name,
             email,
-            role
+            role,
+            team
         });
 
         res.status(200).send({ id: newUserRef.id, message: 'Usuário adicionado com sucesso' });
     } catch (error) {
+        console.error('Erro:', error);
         res.status(500).send('Erro interno');
     }
 };
 
 exports.changeUser = async (req, res) => {
-    const { id, name, email, role } = req.body;
+    const { id, name, email, role, team } = req.body;
 
-    if (!id || !name || !email || !role) {
-        return res.status(400).send('ID, nome, email, e cargo são necessários');
+    if (!id || !name || !email || !role || !team) {
+        return res.status(400).send('ID, nome, email, cargo e equipe são necessários');
     }
 
     try {
@@ -72,7 +74,8 @@ exports.changeUser = async (req, res) => {
         await userRef.update({
             name,
             email,
-            role
+            role,
+            team
         });
 
         res.status(200).send('Usuário atualizado com sucesso');
@@ -93,7 +96,7 @@ exports.deleteUser = async (req, res) => {
         const userRef = db.collection('users').doc(id);
         await userRef.delete();
 
-        res.status(200).send('Usuário deletado com suceso');
+        res.status(200).send('Usuário deletado com sucesso');
     } catch (error) {
         console.error('Erro:', error);
         res.status(500).send('Erro interno');
