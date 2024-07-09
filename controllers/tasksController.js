@@ -40,16 +40,16 @@ exports.getTaskById = async (req, res) => {
 };
 
 exports.addTask = async (req, res) => {
-    const { name, description, priority, time, user } = req.body;
+    const { name, description, priority, time, user, status } = req.body;
 
-    if (!name || !description || !priority || !time || !user) {
+    if (!name || !description || !priority || !time || !user || !status) {
         return res.status(400).send('Nome, descrição, prioridade, tempo e usuário atribuído são requeridos.');
     }
 
     try {
         const tasksRef = db.collection('tasks');
         const newUserRef = await tasksRef.add({
-            name, description, priority, time, user
+            name, description, priority, time, user, status
         });
 
         res.status(200).send({ id: newUserRef.id, message: 'Tarefa adicionada com sucesso' });
@@ -60,16 +60,16 @@ exports.addTask = async (req, res) => {
 };
 
 exports.changeTask = async (req, res) => {
-    const { id,  name, description, priority, time, user } = req.body;
+    const { id,  name, description, priority, time, user, status } = req.body;
 
-    if (!id || !name || !description || !priority || !time || !user) {
+    if (!id || !name || !description || !priority || !time || !user || !status) {
         return res.status(400).send('ID, nome, descrição, prioridade, tempo e usuário atribuído são requeridos.');
     }
 
     try {
         const taskRef = db.collection('tasks').doc(id);
         await taskRef.update({
-            name, description, priority, time, user
+            name, description, priority, time, user, status
         });
 
         res.status(200).send('Tarefa atualizada com sucesso');
