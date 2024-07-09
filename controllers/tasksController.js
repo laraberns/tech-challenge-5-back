@@ -1,5 +1,8 @@
 const { db } = require('../firebase.js');
 
+const validPriorities = ['Alta', 'Média', 'Baixa'];
+const validStatuses = ['Backlog', 'Em Desenvolvimento', 'Finalizada'];
+
 exports.getTasks = async (req, res) => {
     try {
         const tasksRef = db.collection('tasks');
@@ -43,16 +46,28 @@ exports.addTask = async (req, res) => {
     const { name, description, priority, time, user, status } = req.body;
 
     if (!name || !description || !priority || !time || !user || !status) {
-        return res.status(400).send('Nome, descrição, prioridade, tempo e usuário atribuído são requeridos.');
+        return res.status(400).send('Nome, descrição, prioridade, tempo, usuário atribuído e status são requeridos.');
+    }
+
+    if (!validPriorities.includes(priority)) {
+        return res.status(400).send(`Prioridade inválida. As opções válidas são: ${validPriorities.join(', ')}.`);
+    }
+
+    if (!validStatuses.includes(status)) {
+        return res.status(400).send(`Status inválido. As opções válidas são: ${validStatuses.join(', ')}.`);
+    }
+
+    if (!Number.isInteger(time) || time < 0) {
+        return res.status(400).send('Tempo estimado deve ser um número inteiro positivo.');
     }
 
     try {
         const tasksRef = db.collection('tasks');
-        const newUserRef = await tasksRef.add({
+        const newTaskRef = await tasksRef.add({
             name, description, priority, time, user, status
         });
 
-        res.status(200).send({ id: newUserRef.id, message: 'Tarefa adicionada com sucesso' });
+        res.status(200).send({ id: newTaskRef.id, message: 'Tarefa adicionada com sucesso' });
     } catch (error) {
         console.error('Erro:', error);
         res.status(500).send('Erro interno');
@@ -60,10 +75,22 @@ exports.addTask = async (req, res) => {
 };
 
 exports.changeTask = async (req, res) => {
-    const { id,  name, description, priority, time, user, status } = req.body;
+    const { id, name, description, priority, time, user, status } = req.body;
 
     if (!id || !name || !description || !priority || !time || !user || !status) {
-        return res.status(400).send('ID, nome, descrição, prioridade, tempo e usuário atribuído são requeridos.');
+        return res.status(400).send('ID, nome, descrição, prioridade, tempo, usuário atribuído e status são requeridos.');
+    }
+
+    if (!validPriorities.includes(priority)) {
+        return res.status(400).send(`Prioridade inválida. As opções válidas são: ${validPriorities.join(', ')}.`);
+    }
+
+    if (!validStatuses.includes(status)) {
+        return res.status(400).send(`Status inválido. As opções válidas são: ${validStatuses.join(', ')}.`);
+    }
+
+    if (!Number.isInteger(time) || time < 0) {
+        return res.status(400).send('Tempo estimado deve ser um número inteiro positivo.');
     }
 
     try {
@@ -88,8 +115,13 @@ exports.deleteTask = async (req, res) => {
 
     try {
         const taskRef = db.collection('tasks').doc(id);
-        await taskRef.delete();
+        const doc = await taskRef.get();
 
+        if (!doc.exists) {
+            return res.status(404).send('Tarefa não encontrada');
+        }
+
+        await taskRef.delete();
         res.status(200).send('Tarefa deletada com sucesso');
     } catch (error) {
         console.error('Erro:', error);
