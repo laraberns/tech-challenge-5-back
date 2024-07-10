@@ -43,10 +43,10 @@ exports.getTaskById = async (req, res) => {
 };
 
 exports.addTask = async (req, res) => {
-    const { name, description, priority, time, user, status } = req.body;
+    const { name, description, priority, time, user, status, finalDate } = req.body;
 
-    if (!name || !description || !priority || !time || !user || !status) {
-        return res.status(400).send('Nome, descrição, prioridade, tempo, usuário atribuído e status são requeridos.');
+    if (!name || !description || !priority || !time || !user || !status || !finalDate) {
+        return res.status(400).send('Nome, descrição, prioridade, tempo, usuário atribuído, status e data final são requeridos.');
     }
 
     if (!validPriorities.includes(priority)) {
@@ -64,7 +64,7 @@ exports.addTask = async (req, res) => {
     try {
         const tasksRef = db.collection('tasks');
         const newTaskRef = await tasksRef.add({
-            name, description, priority, time, user, status
+            name, description, priority, time, user, status, finalDate
         });
 
         res.status(200).send({ id: newTaskRef.id, message: 'Tarefa adicionada com sucesso' });
@@ -74,11 +74,12 @@ exports.addTask = async (req, res) => {
     }
 };
 
-exports.changeTask = async (req, res) => {
-    const { id, name, description, priority, time, user, status } = req.body;
 
-    if (!id || !name || !description || !priority || !time || !user || !status) {
-        return res.status(400).send('ID, nome, descrição, prioridade, tempo, usuário atribuído e status são requeridos.');
+exports.changeTask = async (req, res) => {
+    const { id, name, description, priority, time, user, status, finalDate } = req.body;
+
+    if (!id || !name || !description || !priority || !time || !user || !status || !finalDate) {
+        return res.status(400).send('ID, nome, descrição, prioridade, tempo, usuário atribuído, status e data final são requeridos.');
     }
 
     if (!validPriorities.includes(priority)) {
@@ -96,7 +97,7 @@ exports.changeTask = async (req, res) => {
     try {
         const taskRef = db.collection('tasks').doc(id);
         await taskRef.update({
-            name, description, priority, time, user, status
+            name, description, priority, time, user, status, finalDate 
         });
 
         res.status(200).send('Tarefa atualizada com sucesso');
@@ -105,6 +106,7 @@ exports.changeTask = async (req, res) => {
         res.status(500).send('Erro interno');
     }
 };
+
 
 exports.deleteTask = async (req, res) => {
     const { id } = req.params;
