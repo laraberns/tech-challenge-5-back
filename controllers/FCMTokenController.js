@@ -1,31 +1,31 @@
 const { db } = require('../firebase.js');
 
 exports.storeFCMToken = async (req, res) => {
-    const { userId, fcmToken } = req.body;
+    const { userId, token } = req.body;
 
-    if (!userId || !fcmToken) {
+    if (!userId || !token) {
         return res.status(400).send('UserID e FCM Token são requeridos.');
     }
 
     try {
-        // Verifica se o usuário já possui um token armazenado
-        const tokenRef = db.collection('FCMTokens').doc(userId);
-        const tokenDoc = await tokenRef.get();
+        // Verifica se já existe algum documento com o mesmo userId ou com um nome diferente
+        const snapshot = await db.collection('FCMTokens').where('userId', '==', userId).get();
 
-        if (tokenDoc.exists) {
-            // Se já existe, atualiza o token existente
-            await tokenRef.update({ token: fcmToken });
-            res.status(200).send('Token FCM atualizado com sucesso.');
-        } else {
-            // Se não existe, cria um novo documento com o token
-            await tokenRef.set({ token: fcmToken });
-            res.status(200).send('Token FCM armazenado com sucesso.');
+        if (!snapshot.empty) {
+            return res.status(200).send('UserID já existe com outro token.');
         }
+
+        // Se não existe, cria um novo documento com o userId e token
+        const docRef = await db.collection('FCMTokens').add({ userId, token });
+        console.log('Token FCM armazenado com sucesso:', docRef.id);
+        return res.status(200).send('Token FCM armazenado com sucesso.');
+        
     } catch (error) {
         console.error('Erro:', error);
-        res.status(500).send('Erro interno ao armazenar o token FCM.');
+        return res.status(500).send('Erro interno ao armazenar o token FCM.');
     }
 };
+
 
 exports.getAllFCMTokens = async (req, res) => {
     try {

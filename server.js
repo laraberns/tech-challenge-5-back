@@ -1,10 +1,15 @@
 const express = require('express');
 const app = express();
+const cors = require('cors');
+
 const port = 8383;
 const bodyParser = require('body-parser');
 const usersRoutes = require('./routes/usersRoutes');
 const tasksRoutes = require('./routes/tasksRoutes');
 const fcmRoute = require('./routes/FCMTokenRoutes');
+
+// Configuração do CORS
+app.use(cors());
 
 app.use(bodyParser.json());
 app.use(express.json());
