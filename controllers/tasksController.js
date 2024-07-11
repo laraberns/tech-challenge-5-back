@@ -97,7 +97,7 @@ exports.changeTask = async (req, res) => {
     try {
         const taskRef = db.collection('tasks').doc(id);
         await taskRef.update({
-            name, description, priority, time, user, status, finalDate
+            name, description, priority, time, user, status, finalDate, fcmtoken
         });
 
         res.status(200).send('Tarefa atualizada com sucesso');
